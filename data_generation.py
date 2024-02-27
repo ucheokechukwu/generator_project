@@ -19,6 +19,7 @@ def data_generation():
 
     df['Day'] = df['Date'] - df['Date'].iloc[0]
     df['Day'] = df['Day'].dt.days
+    df['Day'] = df['Day'] - df.Day.min()
     df['dayofweek'] = df['Date'].dt.weekday
     df['year'] = df['Date'].dt.year
     df['month'] = df['Date'].dt.month
@@ -33,4 +34,12 @@ def data_generation():
     tmp_idx = df[df.dayofweek==2].iloc[0].name
     df = df.loc[tmp_idx:]
 
-    return df
+
+    # selecting the relevant columnns only
+    cols_to_keep = [
+        'Day',
+        'White Ball 0', 'White Ball 1', 'White Ball 2', 'White Ball 3',
+        'White Ball 4', 'White Ball 5', 'Grey Ball',]
+    data = df[cols_to_keep]
+
+    return df, data

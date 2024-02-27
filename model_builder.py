@@ -100,3 +100,23 @@ def evaluate_preds(y_true, y_pred):
   acc = sum(acc)/len(acc)
   
   return {"accuracy": acc}
+
+def make_clf(horizon=6, num_balls=6):
+    model = Sequential()
+    # 5 by 4
+
+    model.add(InputLayer(input_shape=(horizon,num_balls,1)))
+
+    # model.add(Conv2D(1, (3,3), strides=1, activation='relu'))
+    # model.add(MaxPooling2D(pool_size=(2, 2)))
+
+    model.add(Flatten())
+    model.add(Dense(8, activation="relu"))
+    model.add(Dense(50, activation="softmax"))
+
+    # model.build()
+    model.compile(loss="sparse_categorical_crossentropy",
+                        optimizer=tf.keras.optimizers.Adam(),
+                        metrics=['accuracy'])
+    # model.summary()
+    return model
