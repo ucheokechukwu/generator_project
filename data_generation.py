@@ -8,9 +8,9 @@ from tqdm.auto import tqdm
 from rich import pretty, print
 pretty.install()
 
-def data_generation():
-    df = pd.read_pickle("l_649_numbers_data.pkl")
 
+def data_generation():
+    df = pd.read_pickle("data/l_649_numbers_data.pkl")
 
     for col in df.columns[1:]:
         df[col] = df[col].astype('int')
@@ -31,9 +31,8 @@ def data_generation():
     df['weekofyear'] = df['weekofyear'].astype('int')
 
     # cutting off data from when the dayoftheweek was exclusively Friday for consistency??
-    tmp_idx = df[df.dayofweek==2].iloc[0].name
+    tmp_idx = df[df.dayofweek == 2].iloc[0].name
     df = df.loc[tmp_idx:]
-
 
     # selecting the relevant columnns only
     cols_to_keep = [
