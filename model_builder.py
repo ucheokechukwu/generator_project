@@ -146,3 +146,38 @@ def make_attention_model(input_shape):
                   optimizer=tf.keras.optimizers.Adam(),
                   metrics=['accuracy'])
     return model
+
+def create_attention_convolution_model(horizon_attention, horizon_convolution):
+
+    # attention model
+    attn_input_layer = Input(shape=(horizon_attention, 1), name="Attention_InputLayer")
+    attn_layer = AttentionModel()
+    attn_output = attn_layer(attn_input_layer)
+    attn_model = Model(inputs=attn_input_layer, outputs=attn_output, name="attention")
+
+    # conv model
+    conv_input_layer = Input(shape=(horizon_convolution, 8, 1), name="Convolution_InputLayer")
+    conv_layer = ConvolutionalModel()
+    conv_output = conv_layer(conv_input_layer)
+    conv_model = Model(inputs=conv_input_layer, outputs=conv_output, name="convolution")
+
+    # Concatenate model outputs 
+    x = Concatenate()([attn_model.output, conv_model.output])
+
+    # Create output layers 
+    x = Dense(32, activation="relu")(x) 
+    output_layer = Dense(50, activation="softmax")(x)
+
+    # 5. Construct model with char and token inputs
+    model = tf.keras.Model(inputs=[attn_model.input, conv_model.input],
+                        outputs=output_layer,
+                        name="combined_model")
+
+    # Compile the model
+    model.compile(
+        loss="sparse_categorical_crossentropy",
+        optimizer=tf.keras.optimizers.Adam(),
+        metrics=["accuracy"],
+    )
+    plot_model(model, show_shapes=True)
+    return model
