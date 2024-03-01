@@ -82,8 +82,8 @@ class AttentionModel(tf.keras.Model):
 class ConvolutionalModel(Model):
     def __init__(self):
         super().__init__()
-        self.conv = [Conv2D(49, (6, 6), strides=1,
-                            padding='same', activation='relu') for _ in range(12)]
+        self.convs = [Conv2D(49, (6, 6), strides=1,
+                             padding='same', activation='relu') for _ in range(12)]
         # self.conv1 = Conv2D(49, (3, 3), strides=1,
         #                     padding='same', activation='relu')
         # self.conv2 = Conv2D(49, (3, 3), strides=1,
@@ -103,7 +103,7 @@ class ConvolutionalModel(Model):
 
     def call(self, inputs):
         x = inputs
-        for conv in self.conv:
+        for conv in self.convs:
             x = conv(x)
         # x = self.conv1(x)
         # x = self.conv2(x)

@@ -51,7 +51,7 @@ def get_data(data, horizon):
     windows = tf.expand_dims(windows, axis=-1)
     train_windows, test_windows, train_labels, test_labels = make_train_test_splits(
         windows=windows,
-        labels=labels, test_split=0.1)
+        labels=labels, test_split=0.2)
     return train_windows, test_windows, train_labels, test_labels
 
 # model builder
@@ -147,31 +147,36 @@ def make_attention_model(input_shape):
                   metrics=['accuracy'])
     return model
 
+
 def create_attention_convolution_model(horizon_attention, horizon_convolution):
 
     # attention model
-    attn_input_layer = Input(shape=(horizon_attention, 1), name="Attention_InputLayer")
+    attn_input_layer = Input(
+        shape=(horizon_attention, 1), name="Attention_InputLayer")
     attn_layer = AttentionModel()
     attn_output = attn_layer(attn_input_layer)
-    attn_model = Model(inputs=attn_input_layer, outputs=attn_output, name="attention")
+    attn_model = Model(inputs=attn_input_layer,
+                       outputs=attn_output, name="attention")
 
     # conv model
-    conv_input_layer = Input(shape=(horizon_convolution, 8, 1), name="Convolution_InputLayer")
+    conv_input_layer = Input(
+        shape=(horizon_convolution, 8, 1), name="Convolution_InputLayer")
     conv_layer = ConvolutionalModel()
     conv_output = conv_layer(conv_input_layer)
-    conv_model = Model(inputs=conv_input_layer, outputs=conv_output, name="convolution")
+    conv_model = Model(inputs=conv_input_layer,
+                       outputs=conv_output, name="convolution")
 
-    # Concatenate model outputs 
+    # Concatenate model outputs
     x = Concatenate()([attn_model.output, conv_model.output])
 
-    # Create output layers 
-    x = Dense(32, activation="relu")(x) 
+    # Create output layers
+    x = Dense(32, activation="relu")(x)
     output_layer = Dense(50, activation="softmax")(x)
 
     # 5. Construct model with char and token inputs
     model = tf.keras.Model(inputs=[attn_model.input, conv_model.input],
-                        outputs=output_layer,
-                        name="combined_model")
+                           outputs=output_layer,
+                           name="combined_model")
 
     # Compile the model
     model.compile(
