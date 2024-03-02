@@ -18,31 +18,31 @@ from keras.layers import Dense
 
 # convert this into a dataset of 6x6 with a window
 
-def transform_data(data, horizon=6):
-    # Convert the DataFrame to a numpy array
-    data_array = data.to_numpy()
+# def transform_data(data, horizon=6):
+#     # Convert the DataFrame to a numpy array
+#     data_array = data.to_numpy()
 
-    # Calculate the number of slices
-    num_slices = len(data) - horizon + 1
+#     # Calculate the number of slices
+#     num_slices = len(data) - horizon + 1
 
-    # Use numpy's array slicing to create the transformed data
-    data_transformed = np.array([data_array[i:i+horizon]
-                                for i in range(num_slices)])
-    return data_transformed[:-1], data_array[horizon:][:, 1:-1]
+#     # Use numpy's array slicing to create the transformed data
+#     data_transformed = np.array([data_array[i:i+horizon]
+#                                 for i in range(num_slices)])
+#     return data_transformed[:-1], data_array[horizon:][:, 1:-1]
 
 
-# Make the train/test splits
-def make_train_test_splits(windows, labels, test_split=0.2):
-    """
-    Splits matching pairs of windows and labels into train and test splits.
-    """
-    split_size = int(len(windows) * (1-test_split)
-                     )  # this will default to 80% train/20% test
-    train_windows = windows[:split_size]
-    train_labels = labels[:split_size]
-    test_windows = windows[split_size:]
-    test_labels = labels[split_size:]
-    return train_windows, test_windows, train_labels, test_labels
+# # Make the train/test splits
+# def make_train_test_splits(windows, labels, test_split=0.2):
+#     """
+#     Splits matching pairs of windows and labels into train and test splits.
+#     """
+#     split_size = int(len(windows) * (1-test_split)
+#                      )  # this will default to 80% train/20% test
+#     train_windows = windows[:split_size]
+#     train_labels = labels[:split_size]
+#     test_windows = windows[split_size:]
+#     test_labels = labels[split_size:]
+#     return train_windows, test_windows, train_labels, test_labels
 
 
 def get_data(data, horizon):
