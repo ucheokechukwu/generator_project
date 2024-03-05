@@ -162,3 +162,18 @@ def df_to_data(df,
             y_train, y_test, 
             y1_train, y2_train, y3_train, y4_train, y5_train, y6_train, 
             y1_test, y2_test, y3_test, y4_test, y5_test, y6_test]
+
+def make_index_for_input(target):
+    """
+    used to create the index for input X6
+    """
+    try:
+        t = int(target.split('White Ball ')[-1])
+        assert t in range(6)
+    except:
+        return "Invalid target"  
+    idx = [t]
+    for x in range(6):
+        if x != t:
+            idx.extend((x, t))
+    return idx
