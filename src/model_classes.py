@@ -32,12 +32,14 @@ class TransformerEncoder(Layer):
     def call(self, inputs):
         x = self.multi_head_attention(inputs, inputs)
         x = self.dropout1(x)
-        x = self.normalization1(x) # optional normalization
+#         x = self.normalization1(x) # optional normalization
+
         res = x + inputs
         x = self.conv1(res)
         x = self.dropout2(x)
         x = self.conv2(x)
-        x = self.normalization2(x) # optional normalization
+#         x = self.normalization2(x) # optional normalization
+
         return x + res
 
 
@@ -45,11 +47,11 @@ class AttentionModel(Model):
     def __init__(self, 
                  head_size=256, 
                  num_heads=4, 
-                 ff_dim=4, 
+                 ff_dim=44, 
                  num_transformer_blocks=4, 
                  mlp_units=[128], 
-                 dropout=0.25, 
-                 mlp_dropout=0.4):
+                 dropout=0.0, # 0.25
+                 mlp_dropout=0.0): # 0.4
         super().__init__()
         self.transformer_blocks = [TransformerEncoder(
             head_size, num_heads, ff_dim, dropout) for _ in range(num_transformer_blocks)]
