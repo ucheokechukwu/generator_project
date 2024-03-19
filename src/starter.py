@@ -1,7 +1,10 @@
-ROOT_DIR = "/Users/uche/Documents/BackUpFeb_5_2024/LotProj"
-import os
-if os.getcwd != ROOT_DIR:
-    os.chdir(ROOT_DIR)
+try:
+    ROOT_DIR = "/Users/uche/Documents/BackUpFeb_5_2024/LotProj"
+    import os
+    if os.getcwd != ROOT_DIR:
+        os.chdir(ROOT_DIR)
+except:
+    pass
     
 import sys
 sys.path.append('src')   
