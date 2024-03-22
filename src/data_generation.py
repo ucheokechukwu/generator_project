@@ -92,13 +92,15 @@ def make_index_for_input(target):
     """
     try:
         t = int(target.split('WB ')[-1])
-        assert t in range(6)
+        assert t in range(1,7)
     except:
         return "Invalid target"  
     idx = [t]
-    for x in range(6):
+    for x in range(1, 7):
         if x != t:
             idx.extend((x, t))
+            
+    idx = [index-1 for index in idx]
     return idx
 
 def scaling_data(data):
@@ -209,6 +211,12 @@ def df_to_data(
     X0_train, X0_test, y0_train, y0_test = get_X0_data(horizon, train_index, test_index,
                 horizon_x0=horizon_x0, target = target, scaling=scaling)
     
+    # get X6 dataset
+
+    X6_train = X4_train[:,:,make_index_for_input(target)]
+
+    X6_test = X4_test[:,:,make_index_for_input(target)]
+    
     # testing validity
     # only works if there's no scaling
 
@@ -233,7 +241,7 @@ def df_to_data(
     y_test = y_test-(target_number)
           
     return [X0_train, X0_test, X1_train, X2_train, X3_train, X1_test, X2_test, X3_test, X4_train, X4_test, 
-            X5_train, X5_test, 
+            X5_train, X5_test, X6_train, X6_test, 
             y_train, y_test]
 
 
@@ -241,32 +249,36 @@ def df_to_data(
 def sample_data(target = 'WB 1', 
                 return_data=True,
                 horizon_x0 = 100,
-                horizon_x4=12, 
-                horizon_x5=20, 
-                scaling=False,
-                docstring=False):
+                horizon_x4 = 2400, 
+                horizon_x5 = 20, 
+                train_test_split = 0.8,
+                scaling = False,
+                docstring = False):
+    
+    """Data is a list in this order:
+        X0_train, X0_test, 
+        X1_train, X2_train, X3_train, X1_test, X2_test, X3_test, 
+        X4_train, X4_test, 
+        X5_train, X5_test, 
+        X6_train, X6_test,
+        y_train, y_test."""
 
     df, _ = data_generation()
     
     # get train and test indices
     horizon = max(horizon_x0, horizon_x5, horizon_x4)
     tmp = df.iloc[horizon:]
-    split = int(0.8*len(tmp))
+    split = int(train_test_split*len(tmp))
     train_index = range(0,split)
     test_index  = range(split, len(tmp))
     
     if docstring:
-        print("""Data is a list in this order:
-        X0_train, X0_test, 
-        X1_train, X2_train, X3_train, X1_test, X2_test, X3_test, 
-        X4_train, X4_test, 
-        X5_train, X5_test, 
-        y_train, y_test""")
         print("""
         [bold]X0_train[/]\t\t\t - Time series of target column for attenuation, horizon_x0 for SubModel X0
         [bold]X1_train, X2_train, X3_train[/]\t - Datetime parameters for SubModelX123
         [bold]X4_train[/]\t\t\t - Windowed data of all 6 target columns with horizon_x4 for SubModelX4
-        [bold]X5_train[/]\t\t\t - Windowed data of target column and 1st and 6th target with horizon_x5 for SubModelX4
+        [bold]X5_train[/]\t\t\t - Windowed data of target column and 1st and 6th target with horizon_x5 for SubModelX5
+        [bold]X6_train[/]\t\t\t - Windowed data of target column looped with other columns with horizon_x4 for SubModelX5
         """)
     
     if return_data:
