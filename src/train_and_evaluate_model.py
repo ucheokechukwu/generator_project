@@ -1,9 +1,6 @@
-
-
 from keras.callbacks import EarlyStopping, LearningRateScheduler
 from keras.utils import set_random_seed
 from data_generation import sample_data
-
 
 
 set_random_seed(0)
@@ -16,33 +13,36 @@ def scheduler(epoch, lr):
     return lr if epoch<=5 else lr*np.exp(-0.1)
 lr_scheduler = LearningRateScheduler(scheduler)
 
-def train_and_evaluate_model(model, horizon_x4=1200):
+def train_and_evaluate_model(model=None, 
+                            trainset='X4', 
+                            **qwargs):
 
-    data = sample_data(target='WB 6',
-                        horizon_x0=0,
-                        horizon_x4=horizon_x4,
-                        horizon_x5=0,
-                        train_test_split=0.7,
-                        scaling=True)
-    X4_train = data[8]
-    X4_test = data[9]
+    data = sample_data(**qwargs)
+
+    dictionary_of_trainsets = {
+        'X4': [8, 9],
+        'X0': [0, 1],
+        'X123': [(slice(2,5)), slice(5,8)],
+        'X6': [12, 13],    }
     y_train, y_test = data[-2], data[-1]
-    print(X4_train.shape)
+
+    X_train = data[dictionary_of_trainsets[trainset][0]]
+    X_test = data[dictionary_of_trainsets[trainset][1]]
 
     model.compile(loss='sparse_categorical_crossentropy',
               optimizer='adamax',
               metrics='accuracy')
     try:
-        model.fit(X4_train, y_train,
-          validation_data = (X4_test, y_test),
+        model.fit(X_train, y_train,
+          validation_data = (X_test, y_test),
           batch_size=128,
-          epochs=20,
+          epochs=1,
           verbose=1,
           callbacks=[earlystopping],
-          # steps_per_epoch = 1,
+          steps_per_epoch = 1,
           )
-        return model.evaluate(X4_test, y_test, verbose=2)[-1]
+        return model.evaluate(X_test, y_test, verbose=2)[-1]
 
-    except:
-        print(f"{model.name} failed to train.")
+    except Exception as e:
+        print(f"{model.name} failed to train.\n{str(e)}")
         return -1
