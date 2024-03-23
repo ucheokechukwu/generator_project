@@ -17,6 +17,14 @@ def train_and_evaluate_model(model=None,
                             trainset='X4', 
                             **qwargs):
 
+    """
+    model: keras model. If none, function returns the train and test data
+    trainset: one of ['X0', 'X123', 'X4', 'X6']
+    qwargs for sample_data () function
+    """    
+    if trainset not in ['X0', 'X123', 'X4', 'X6']:
+        return  "Invalid trainset value."                  
+
     data = sample_data(**qwargs)
 
     dictionary_of_trainsets = {
@@ -26,8 +34,11 @@ def train_and_evaluate_model(model=None,
         'X6': [12, 13],    }
     y_train, y_test = data[-2], data[-1]
 
+
     X_train = data[dictionary_of_trainsets[trainset][0]]
     X_test = data[dictionary_of_trainsets[trainset][1]]
+    if not model:
+        return X_train, X_test, y_train, y_test
 
     model.compile(loss='sparse_categorical_crossentropy',
               optimizer='adamax',

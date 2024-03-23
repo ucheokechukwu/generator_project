@@ -43,6 +43,47 @@ def data_generation():
 
     return df, data
 
+def stratify_train_test_split(data, target, train_test_split=0.8):
+    y = data[target]
+    y = y.reset_index(drop=True)
+    
+
+    Counter_y = {}
+    for v in np.unique(y):
+        Counter_y[v] = []
+    for k, v in y.items():
+        Counter_y[v].append(k)
+
+    split = train_test_split
+    y_train, y_test = {} ,  {}
+    for k, v in Counter_y.items():
+        
+        split_point = int(split*len(v))
+        split_point = split_point+1 if len(v)==1 else split_point
+
+        y_train[k]= v[:split_point]
+        y_test[k]= v[split_point:]
+
+
+    for k in Counter_y.keys():
+        assert len(Counter_y[k]) == len(y_train[k])+len(y_test[k])
+
+
+    train_index = [y for sublist in y_train.values() for y in sublist]
+    test_index = [y for sublist in y_test.values() for y in sublist]
+
+    train_index = np.sort(train_index)
+    test_index = np.sort(test_index)
+
+    assert all(np.unique(train_index) == train_index)
+    assert all(np.unique(test_index) == test_index)
+    
+    
+    return train_index, test_index
+
+
+
+
 def make_train_test_splits(windows, labels, train_index, test_index):
     """
     Splits matching pairs of windows and labels into train and test splits.
@@ -252,7 +293,7 @@ def sample_data(target = 'WB 1',
                 horizon_x4 = 2400, 
                 horizon_x5 = 20, 
                 train_test_split = 0.8,
-                scaling = False,
+                scaling = True,
                 docstring = False):
     
     """Data is a list in this order:
@@ -268,9 +309,13 @@ def sample_data(target = 'WB 1',
     # get train and test indices
     horizon = max(horizon_x0, horizon_x5, horizon_x4)
     tmp = df.iloc[horizon:]
-    split = int(train_test_split*len(tmp))
-    train_index = range(0,split)
-    test_index  = range(split, len(tmp))
+    
+    train_index, test_index = stratify_train_test_split(tmp, target, train_test_split=0.8)
+    
+    
+#     split = int(train_test_split*len(tmp))
+#     train_index = range(0,split)
+#     test_index  = range(split, len(tmp))
     
     if docstring:
         print("""
