@@ -43,7 +43,11 @@ def data_generation():
 
     return df, data
 
-def stratify_train_test_split(data, target, train_test_split=0.8):
+def stratify_train_test_split(data, 
+                              target, 
+                              class_balancing = True,
+                              train_test_split=0.8):
+    import math
     y = data[target]
     y = y.reset_index(drop=True)
     
@@ -63,25 +67,38 @@ def stratify_train_test_split(data, target, train_test_split=0.8):
 
         y_train[k]= v[:split_point]
         y_test[k]= v[split_point:]
-
-
+        
     for k in Counter_y.keys():
         assert len(Counter_y[k]) == len(y_train[k])+len(y_test[k])
+   
+    if class_balancing:
+        # modifies the y_train index for class balancing"
 
+        y_train_counter = {}
+        for k, v in y_train.items():
+            y_train_counter[k] = len(v)
+
+        max_label = pd.Series(y_train_counter).max()
+
+        y_train_class_multiplier = {}
+        for k, v in y_train_counter.items():
+            y_train_class_multiplier[k] = math.ceil(max_label/v)
+
+        y_train_balanced = {}
+        for k,v in y_train.items():
+            y_train_balanced[k] = (v*y_train_class_multiplier[k])[:max_label]
+
+        y_train = y_train_balanced     
 
     train_index = [y for sublist in y_train.values() for y in sublist]
     test_index = [y for sublist in y_test.values() for y in sublist]
+    
 
     train_index = np.sort(train_index)
     test_index = np.sort(test_index)
-
-    assert all(np.unique(train_index) == train_index)
-    assert all(np.unique(test_index) == test_index)
     
     
     return train_index, test_index
-
-
 
 
 def make_train_test_splits(windows, labels, train_index, test_index):
@@ -211,7 +228,6 @@ def df_to_data(
     X1_train, X2_train, X3_train = X_train.iloc[:,:1], X_train.iloc[:,1:-1], X_train.iloc[:,-1:]
     X1_test, X2_test, X3_test = X_test.iloc[:,:1], X_test.iloc[:,1:-1], X_test.iloc[:,-1:]
 
-
     ############### getting the convoluted trains ========================
     
     tmp_data = data[target_cols].copy()
@@ -278,8 +294,8 @@ def df_to_data(
         if target_number == 6:
             assert all(y_train==y6_train) and all(y_test==y6_test)  
             
-    y_train = y_train-(target_number)
-    y_test = y_test-(target_number)
+    y_train = y_train - target_number
+    y_test = y_test - target_number
           
     return [X0_train, X0_test, X1_train, X2_train, X3_train, X1_test, X2_test, X3_test, X4_train, X4_test, 
             X5_train, X5_test, X6_train, X6_test, 
@@ -293,6 +309,7 @@ def sample_data(target = 'WB 1',
                 horizon_x4 = 2400, 
                 horizon_x5 = 20, 
                 train_test_split = 0.8,
+                stratify=False,
                 scaling = True,
                 docstring = False):
     
@@ -310,12 +327,13 @@ def sample_data(target = 'WB 1',
     horizon = max(horizon_x0, horizon_x5, horizon_x4)
     tmp = df.iloc[horizon:]
     
-    train_index, test_index = stratify_train_test_split(tmp, target, train_test_split=0.8)
+    if stratify:
+        train_index, test_index = stratify_train_test_split(tmp, target, train_test_split=train_test_split)
     
-    
-#     split = int(train_test_split*len(tmp))
-#     train_index = range(0,split)
-#     test_index  = range(split, len(tmp))
+    else:
+        split = int(train_test_split*len(tmp))
+        train_index = range(0,split)
+        test_index  = range(split, len(tmp))
     
     if docstring:
         print("""
