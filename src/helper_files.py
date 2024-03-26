@@ -64,3 +64,18 @@ def confusion_matrix_plotter(m, X1_test, X2_test, X3_test, y_test):
     plt.yticks(fontsize=10)
     plt.tight_layout()
     plt.show()
+
+from datetime import datetime
+import functools
+
+
+def timestamp(func):
+    @functools.wraps(func)
+    def wrapper(**kwargs):
+        print(f'Timestamp {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
+        return func(**kwargs)
+    return wrapper
+
+@timestamp
+def timestamp_printer(content):
+    print(content)
