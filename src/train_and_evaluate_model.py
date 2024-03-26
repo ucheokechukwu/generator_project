@@ -15,6 +15,8 @@ def scheduler(epoch, lr):
 def train_and_evaluate_model(model=None, 
                             trainset=None, 
                             patience=5,
+                            optimizer='adamax',
+                            initial_epoch=0,
                             num_epochs=20,
                             metrics='accuracy',
                             training_verbose=True,
@@ -60,12 +62,13 @@ def train_and_evaluate_model(model=None,
     
 
     model.compile(loss='sparse_categorical_crossentropy',
-              optimizer='adamax',
+              optimizer=optimizer,
               metrics=metrics)
     try:
         model.fit(X_train, y_train,
           validation_data = (X_test, y_test),
           batch_size=32,
+          initial_epoch=0,
           epochs=num_epochs,
           verbose=int(training_verbose),
           callbacks=[earlystopping, lr_scheduler],
